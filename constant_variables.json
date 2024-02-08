@@ -1,0 +1,19 @@
+{
+  "active_tutors" :  ["Andrew Kowblansky", "\ufeffAbby McCollam", "Alex Whitesides", "Lizzie Wright", "Marina Von Behren"],
+  "retired_tutors" : ["Prax Sanchez"],
+  "active_students" : ["Maroney, Caitlin", "Blankenbecler, Charlotte", "Parida, Masoom", "Tejedor, Sofia", "Niland, Chloe",
+                        "Bolster, Livia", "Thill, Peter", "Thill, Henry", "Seigle, Michael", "Washer, Lemon", "Niland, Hailey",
+                        "Bounavong, Lawrence", "Windom, Wix", "Black, Hayden", "Ferguson, Audrey", "Fox, Talia"],
+  "active_parents" :  [],
+  "inactive_students" :  [],
+  "lesson_price" :  85,
+  "lesson_duration" : 60,
+  "stripe_fee" : 0.03,
+  "current_subjects": [],
+  "home_address" :  "https://app.tutorbird.com/Teacher/v2/en/home",
+  "business_report_address": "https://app.tutorbird.com/Teacher/v2/en/reports/add",
+  "calendar_address": "https://app.tutorbird.com/Teacher/v2/en/calendar",
+  "student_view_address": "https://app.tutorbird.com/Teacher/v2/en/students",
+  "tutors_address": "https://app.tutorbird.com/Teacher/v2/en/teachers",
+  "default_download_location": "/Users/juanmartinez/Downloads"
+}
