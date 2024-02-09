@@ -1,5 +1,7 @@
 import csv
+import os
 import json
+import generate_tutor_payroll_report as payroll_generator
 
 
 class TutorPayrollParser:
@@ -11,18 +13,28 @@ class TutorPayrollParser:
 
         self.tutor_list = self.tutoring_constants["active_tutors"]
         self.student_list = self.tutoring_constants["active_students"]
+        self.default_save_path = self.tutoring_constants["default_download_location"]
 
     def run(self):
         total, attendance, payments = self.generate_totals()
+        print("Total Payroll: \n")
+        print(total)
+        print("Student Attendance: \n")
+        print(attendance)
+        print("Individual Tutor Payments: \n")
+        print(payments)
+
         self.visualize_percentages(total, attendance, payments)
 
     def generate_totals(self):
-        total_payment_due = 0
+        print("generating totals")
         tutor_payments = {}
         student_attendance = {}
         current_student = ""
+        os.chdir(self.default_save_path)
         with open(self.doc, 'r') as payroll_file:
             csv_reader = csv.reader(payroll_file)
+            print(f"file {self.default_save_path}/{self.doc} opened successfully. Parsing now...")
             for row in csv_reader:
                 print(row)
                 tutor = [name for name in self.tutor_list if name in row]
@@ -54,6 +66,8 @@ class TutorPayrollParser:
 
 
 if __name__ == "__main__":
-    doc = "/Users/juanmartinez/Downloads/payroll_example.csv"
+    generator = payroll_generator.PayrollReportGenerator('1/1/2024', '2/6/2024')
+    generator.run()
+    doc = generator.output_file
     parser = TutorPayrollParser(doc)
     parser.run()

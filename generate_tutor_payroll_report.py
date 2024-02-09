@@ -9,6 +9,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.safari.options import Options
 import time
+import tutorbird_helper as tb
 import os
 
 
@@ -43,6 +44,9 @@ class PayrollReportGenerator:
         self.home_address = self.tutoring_constants["home_address"]
         self.business_report_address = self.tutoring_constants["business_report_address"]
         self.default_save_location = self.tutoring_constants["default_download_location"]
+        self.username = self.tutoring_constants["login_username"]
+        self.password = self.tutoring_constants["login_password"]
+        self.output_file = f"tutor_payroll_{self.start_date.replace('/', '_')} to {self.end_date.replace('/', '_')}.csv"
 
         # set up autonomous browser and configure base driver
         options = Options()
@@ -54,7 +58,7 @@ class PayrollReportGenerator:
     def run(self):
         self.generate_report()
         time.sleep(5)
-        self.rename_file()
+        tb.rename_file(self.default_save_location, self.output_file)
 
     def generate_report(self):
         # first go home screen
@@ -68,8 +72,10 @@ class PayrollReportGenerator:
             EC.presence_of_element_located((By.NAME, 'ctl00$ctl00$MainContent$contentBody$buttonLogin')))
 
         # Input your credentials and click login
-        username_input.send_keys('crypworld2000@gmail.com')
-        password_input.send_keys('qwertQWERT1')
+        # username_input.send_keys(self.username)
+        # password_input.send_keys(self.password)
+        username_input.send_keys("crypworld2000@gmail.com")
+        password_input.send_keys("qwertQWERT1")
         submit_button.click()
 
         # wait for login to proceed, change if necessary
@@ -92,7 +98,6 @@ class PayrollReportGenerator:
         calendar_start = self.driver.find_element(By.ID, "mat-input-0")
         calendar_start.click()
         time.sleep(1)
-        self.get_current_html()
 
         # first, check to see if year is in the current year
         # then check if month is in current month
@@ -102,7 +107,8 @@ class PayrollReportGenerator:
         end = "[aria-label='" + self.end_date + "']"
 
         # first check to see if the dates appear on the default calendar or if we need to switch tabs
-        self.switch_to_correct_date(start)
+        tb.switch_to_correct_date(self.driver, start)
+
         # select the first date
         first_date = self.driver.find_element(By.CSS_SELECTOR, start)
         first_date.click()
@@ -115,7 +121,7 @@ class PayrollReportGenerator:
         report_progress("selected end date")
         time.sleep(1)
 
-        self.switch_to_correct_date(end)
+        tb.switch_to_correct_date(self.driver, end)
         # select the end date
         last_date = self.driver.find_element(By.CSS_SELECTOR, end)
         last_date.click()
@@ -159,100 +165,55 @@ class PayrollReportGenerator:
         wait_for_download()
 
         self.driver.quit()
-
-    def get_current_html(self):
-        page_source = self.driver.page_source
-        soup = BeautifulSoup(page_source, 'html.parser')
-        print(soup.prettify())
-        # parse_HTML(soup, 'Download')
-
-    def rename_file(self):
-        os.chdir(self.default_save_location)
-
-        files = glob.glob("*")
-        # Sort files by modification time to get the most recent one
-        latest_file = max(files, key=os.path.getmtime)
-
-        # Rename the most recent file
-        new_name = f"tutor_payroll_{self.start_date}_{self.end_date}.csv"  # Provide your desired new name here
-        os.rename(latest_file, new_name)
-
-    def rename_file(self):
-        # Specify the directory where the files are located
-        directory = self.default_save_location
-
-        # Change to the directory if needed
-        # os.chdir(directory)
-
-        # Get a list of all files in the directory
-        files = glob.glob(os.path.join(directory, "*"))
-
-        if not files:
-            print("No files found in the directory.")
-            return
-
-        # Sort files by modification time to get the most recent one
-        latest_file = max(files, key=os.path.getmtime)
-
-        # Extract the file name
-        file_name = os.path.basename(latest_file)
-
-        # Provide your desired new name here
-        new_name = f"tutor_payroll_{self.start_date.replace('/', '_')} to {self.end_date.replace('/', '_')}.csv"
-
-        # Rename the most recent file
-        os.rename(latest_file, os.path.join(directory, new_name))
-
-        print(f"File '{file_name}' has been renamed to '{new_name}'.")
-
-    def switch_to_correct_date(self, date):
-        # Regular expression pattern to match the date
-        pattern = r"\d+/\d+/\d+"
-
-        # Find all matches of the pattern in the input string
-        matches = re.findall(pattern, date)
-
-        # If there are matches, extract the first one
-        if matches:
-            date = matches[0]
-            print("Extracted date:", date)
-        else:
-            print("No date found in the input string")
-        date = datetime.strptime(date, "%m/%d/%Y")
-
-        # Get the current month and year
-        current_month = datetime.now().month
-        current_year = datetime.now().year
-        next_year_button = self.driver.find_element(By.ID, "iconButtonID-datePickerHeaderNextYearButton")
-        last_year_button = self.driver.find_element(By.ID, "iconButtonID-datePickerHeaderPreviousYearButton")
-        next_month_button = self.driver.find_element(By.ID, "iconButtonID-datePickerHeaderNextMonthButton")
-        last_month_button = self.driver.find_element(By.ID, "iconButtonID-datePickerHeaderPreviousMonthButton")
-
-        if date.year != current_year:
-            diff = current_year - date.year
-            print("difference in years: ", diff)
-            # in the case that the input year is in the future
-            if diff < 0:
-                for i in range(abs(diff)):
-                    next_year_button.click()
-                    time.sleep(1)
-            else:
-                for i in range(abs(diff)):
-                    last_year_button.click()
-                    time.sleep(1)
-
-        if date.month != current_month:
-            diff = current_month - date.month
-            print("difference in months: ", diff)
-            # in the case that the input year is in the future
-            if diff < 0:
-                for i in range(abs(diff)):
-                    next_month_button.click()
-                    time.sleep(1)
-            else:
-                for i in range(abs(diff)):
-                    last_month_button.click()
-                    time.sleep(1)
+    #
+    # def switch_to_correct_date(self, date):
+    #     # Regular expression pattern to match the date
+    #     pattern = r"\d+/\d+/\d+"
+    #
+    #     # Find all matches of the pattern in the input string
+    #     matches = re.findall(pattern, date)
+    #
+    #     # If there are matches, extract the first one
+    #     if matches:
+    #         date = matches[0]
+    #         print("Extracted date:", date)
+    #     else:
+    #         print("No date found in the input string")
+    #     date = datetime.strptime(date, "%m/%d/%Y")
+    #
+    #     # Get the current month and year
+    #     current_month = datetime.now().month
+    #     current_year = datetime.now().year
+    #     next_year_button = self.driver.find_element(By.ID, "iconButtonID-datePickerHeaderNextYearButton")
+    #     last_year_button = self.driver.find_element(By.ID, "iconButtonID-datePickerHeaderPreviousYearButton")
+    #     next_month_button = self.driver.find_element(By.ID, "iconButtonID-datePickerHeaderNextMonthButton")
+    #     last_month_button = self.driver.find_element(By.ID, "iconButtonID-datePickerHeaderPreviousMonthButton")
+    #
+    #     if date.year != current_year:
+    #         diff = current_year - date.year
+    #         print("difference in years: ", diff)
+    #         # in the case that the input year is in the future
+    #         if diff < 0:
+    #             for i in range(abs(diff)):
+    #                 next_year_button.click()
+    #                 time.sleep(1)
+    #         else:
+    #             for i in range(abs(diff)):
+    #                 last_year_button.click()
+    #                 time.sleep(1)
+    #
+    #     if date.month != current_month:
+    #         diff = current_month - date.month
+    #         print("difference in months: ", diff)
+    #         # in the case that the input year is in the future
+    #         if diff < 0:
+    #             for i in range(abs(diff)):
+    #                 next_month_button.click()
+    #                 time.sleep(1)
+    #         else:
+    #             for i in range(abs(diff)):
+    #                 last_month_button.click()
+    #                 time.sleep(1)
 
 
 if __name__ == "__main__":
