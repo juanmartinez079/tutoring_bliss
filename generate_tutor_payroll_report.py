@@ -1,8 +1,4 @@
-from bs4 import BeautifulSoup
-from datetime import datetime
 import json
-import glob
-import re
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -10,24 +6,6 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.safari.options import Options
 import time
 import tutorbird_helper as tb
-import os
-
-
-def wait_for_download(timeout=20):
-    start_time = time.time()
-    downloads_dir = os.path.expanduser('~/Downloads')
-    initial_files = set(os.listdir(downloads_dir))
-    while time.time() - start_time < timeout:
-        print("waiting for file to download...")
-        current_files = set(os.listdir(downloads_dir))
-        new_files = current_files - initial_files
-
-        if new_files:
-            return True
-
-        time.sleep(1)  # Adjust the sleep duration based on your needs
-
-    return False
 
 
 def report_progress(message):
@@ -72,10 +50,10 @@ class PayrollReportGenerator:
             EC.presence_of_element_located((By.NAME, 'ctl00$ctl00$MainContent$contentBody$buttonLogin')))
 
         # Input your credentials and click login
-        # username_input.send_keys(self.username)
-        # password_input.send_keys(self.password)
-        username_input.send_keys("crypworld2000@gmail.com")
-        password_input.send_keys("qwertQWERT1")
+        username_input.send_keys(self.username)
+        password_input.send_keys(self.password)
+        # username_input.send_keys("crypworld2000@gmail.com")
+        # password_input.send_keys("qwertQWERT1")
         submit_button.click()
 
         # wait for login to proceed, change if necessary
@@ -148,72 +126,10 @@ class PayrollReportGenerator:
         # wait for report to be created
         time.sleep(8)
 
-        # select the top option
-        top_checkbox = self.driver.find_element(By.ID, 'checkboxID-selectCheckBox0')
-        top_checkbox.click()
-        time.sleep(1)
-
-        # click options tab
-        options = self.driver.find_element(By.ID, 'TeacherPortalInstructorsAdminsToolsMenuButton')
-        options.click()
-        time.sleep(3)
-
-        download_button = WebDriverWait(self.driver, 10).until(
-            EC.element_to_be_clickable((By.XPATH, '//div[p/text()="Download"]'))
-        )
-        download_button.click()
-        wait_for_download()
+        tb.download_most_recent_report(self.driver)
+        tb.wait_for_download()
 
         self.driver.quit()
-    #
-    # def switch_to_correct_date(self, date):
-    #     # Regular expression pattern to match the date
-    #     pattern = r"\d+/\d+/\d+"
-    #
-    #     # Find all matches of the pattern in the input string
-    #     matches = re.findall(pattern, date)
-    #
-    #     # If there are matches, extract the first one
-    #     if matches:
-    #         date = matches[0]
-    #         print("Extracted date:", date)
-    #     else:
-    #         print("No date found in the input string")
-    #     date = datetime.strptime(date, "%m/%d/%Y")
-    #
-    #     # Get the current month and year
-    #     current_month = datetime.now().month
-    #     current_year = datetime.now().year
-    #     next_year_button = self.driver.find_element(By.ID, "iconButtonID-datePickerHeaderNextYearButton")
-    #     last_year_button = self.driver.find_element(By.ID, "iconButtonID-datePickerHeaderPreviousYearButton")
-    #     next_month_button = self.driver.find_element(By.ID, "iconButtonID-datePickerHeaderNextMonthButton")
-    #     last_month_button = self.driver.find_element(By.ID, "iconButtonID-datePickerHeaderPreviousMonthButton")
-    #
-    #     if date.year != current_year:
-    #         diff = current_year - date.year
-    #         print("difference in years: ", diff)
-    #         # in the case that the input year is in the future
-    #         if diff < 0:
-    #             for i in range(abs(diff)):
-    #                 next_year_button.click()
-    #                 time.sleep(1)
-    #         else:
-    #             for i in range(abs(diff)):
-    #                 last_year_button.click()
-    #                 time.sleep(1)
-    #
-    #     if date.month != current_month:
-    #         diff = current_month - date.month
-    #         print("difference in months: ", diff)
-    #         # in the case that the input year is in the future
-    #         if diff < 0:
-    #             for i in range(abs(diff)):
-    #                 next_month_button.click()
-    #                 time.sleep(1)
-    #         else:
-    #             for i in range(abs(diff)):
-    #                 last_month_button.click()
-    #                 time.sleep(1)
 
 
 if __name__ == "__main__":

@@ -2,6 +2,7 @@ import csv
 import os
 import json
 import generate_tutor_payroll_report as payroll_generator
+import data_visualizer_helper as visuals
 
 
 class TutorPayrollParser:
@@ -23,8 +24,9 @@ class TutorPayrollParser:
         print(attendance)
         print("Individual Tutor Payments: \n")
         print(payments)
+        visuals.bar_plot_visualization([attendance, payments],
+                                       ["Student Attendace", "Tutor Payments Due"])
 
-        self.visualize_percentages(total, attendance, payments)
 
     def generate_totals(self):
         print("generating totals")
@@ -36,7 +38,6 @@ class TutorPayrollParser:
             csv_reader = csv.reader(payroll_file)
             print(f"file {self.default_save_path}/{self.doc} opened successfully. Parsing now...")
             for row in csv_reader:
-                print(row)
                 tutor = [name for name in self.tutor_list if name in row]
                 student = [name for name in self.student_list if name in row[2]]
                 balance_row = "Tutor Balance" in row
@@ -66,7 +67,7 @@ class TutorPayrollParser:
 
 
 if __name__ == "__main__":
-    generator = payroll_generator.PayrollReportGenerator('1/1/2024', '2/6/2024')
+    generator = payroll_generator.PayrollReportGenerator('1/27/2024', '2/2/2024')
     generator.run()
     doc = generator.output_file
     parser = TutorPayrollParser(doc)

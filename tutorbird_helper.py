@@ -4,6 +4,10 @@ import glob
 import os
 import re
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+
 import time
 
 
@@ -36,7 +40,7 @@ def rename_file(save_location, output_name):
     print(f"File '{file_name}' has been renamed to '{output_name}'.")
 
 
-def switch_to_correct_date(driver, date):
+def switch_to_correct_date(driver, date, default_start="current"):
     # Regular expression pattern to match the date
     pattern = r"\d+/\d+/\d+"
 
@@ -51,9 +55,17 @@ def switch_to_correct_date(driver, date):
         print("No date found in the input string")
     date = datetime.strptime(date, "%m/%d/%Y")
 
-    # Get the current month and year
-    current_month = datetime.now().month
-    current_year = datetime.now().year
+    if default_start == "current":
+        # Get the current month and year
+        current_month = datetime.now().month
+        current_year = datetime.now().year
+    elif default_start == "last_year_start":
+        current_year = datetime.now().year - 1
+        current_month = 1
+    elif default_start == "last_year_end":
+        current_year = datetime.now().year - 1
+        current_month = 12
+
     next_year_button = driver.find_element(By.ID, "iconButtonID-datePickerHeaderNextYearButton")
     last_year_button = driver.find_element(By.ID, "iconButtonID-datePickerHeaderPreviousYearButton")
     next_month_button = driver.find_element(By.ID, "iconButtonID-datePickerHeaderNextMonthButton")
@@ -66,11 +78,11 @@ def switch_to_correct_date(driver, date):
         if diff < 0:
             for i in range(abs(diff)):
                 next_year_button.click()
-                time.sleep(1)
+                time.sleep(0.1)
         else:
             for i in range(abs(diff)):
                 last_year_button.click()
-                time.sleep(1)
+                time.sleep(0.1)
 
     if date.month != current_month:
         diff = current_month - date.month
@@ -79,8 +91,42 @@ def switch_to_correct_date(driver, date):
         if diff < 0:
             for i in range(abs(diff)):
                 next_month_button.click()
-                time.sleep(1)
+                time.sleep(0.1)
         else:
             for i in range(abs(diff)):
                 last_month_button.click()
-                time.sleep(1)
+                time.sleep(0.1)
+
+
+def download_most_recent_report(driver):
+    # select the top option
+    top_checkbox = driver.find_element(By.ID, 'checkboxID-selectCheckBox0')
+    top_checkbox.click()
+    time.sleep(1)
+
+    # click options tab
+    options = driver.find_element(By.ID, 'TeacherPortalInstructorsAdminsToolsMenuButton')
+    options.click()
+    time.sleep(1)
+
+    download_button = WebDriverWait(driver, 10).until(
+        EC.element_to_be_clickable((By.XPATH, '//div[p/text()="Download"]'))
+    )
+    download_button.click()
+
+
+def wait_for_download(timeout=20):
+    start_time = time.time()
+    downloads_dir = os.path.expanduser('~/Downloads')
+    initial_files = set(os.listdir(downloads_dir))
+    while time.time() - start_time < timeout:
+        print("waiting for file to download...")
+        current_files = set(os.listdir(downloads_dir))
+        new_files = current_files - initial_files
+
+        if new_files:
+            return True
+
+        time.sleep(1)  # Adjust the sleep duration based on your needs
+
+    return False
