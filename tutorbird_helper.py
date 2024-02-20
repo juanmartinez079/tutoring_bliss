@@ -6,9 +6,17 @@ import re
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-
-
 import time
+import tkinter as tk
+from tkinter import filedialog
+
+
+def select_file():
+    root = tk.Tk()
+    root.withdraw()  # Hide the main window
+
+    file_path = filedialog.askopenfilename()  # Open file dialog
+    return file_path
 
 
 def get_current_html(driver):

@@ -131,9 +131,3 @@ class PayrollReportGenerator:
 
         self.driver.quit()
 
-
-if __name__ == "__main__":
-    start_date = '3/4/2021'
-    end_date = '4/17/2024'
-    generator = PayrollReportGenerator(start_date, end_date)
-    generator.run()

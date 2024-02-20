@@ -55,6 +55,7 @@ def bar_plot_visualization(dataset, datalabels):
     anim = FuncAnimation(fig, animate, frames=50, interval=1, repeat=False)
 
     plt.tight_layout()
+
     plt.show()
 
 
@@ -69,8 +70,7 @@ def pie_chart_visualization(data):
             wedge.set_width(0.4 * frame / 50)
 
     # Create the animation
-    anim = FuncAnimation(fig, update, frames = 300, interval=1, repeat=False)
+    anim = FuncAnimation(fig, update, frames=300, interval=1, repeat=False)
 
     plt.show()
     print('done')
-

@@ -49,8 +49,10 @@ class RevenueExpenseParser:
         # Load the CSV file into a DataFrame
         df = pd.read_csv(self.doc, skiprows=[0], usecols=range(1, 7))
         print(f"file {self.default_save_path}/{self.doc} opened successfully. Parsing now...")
+
         fee_list = ["Bank Fees", "Memberships and Dues", "Website"]
         current_section = "Revenue"
+        # iterate through each row in the CSV
         for i, row in df.iterrows():
             amount = remove_commas(row["Amount"])
 
